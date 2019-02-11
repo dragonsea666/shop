@@ -1,0 +1,231 @@
+{% extends 'base_main.html' %}
+
+{% block title %}
+天天生鲜-商品详情
+{% endblock %}
+
+
+
+
+
+
+
+{% block contend %}
+	<div class="navbar_con">
+		<div class="navbar clearfix">
+			<div class="subnav_con fl">
+				<h1>全部商品分类</h1>
+				<span></span>
+				<ul class="subnav">
+					{% for category,id in data.items %}
+					<li><a href="{% url 'goods:list' id %}" class="fruit">{{ category }}</a></li>
+					{% endfor %}
+				</ul>
+			</div>
+			<ul class="navlist fl">
+				<li><a href="/goods/index/">首页</a></li>
+				<li class="interval">|</li>
+				<li><a href="">手机生鲜</a></li>
+				<li class="interval">|</li>
+				<li><a href="">抽奖</a></li>
+			</ul>
+		</div>
+	</div>
+
+	<div class="breadcrumb">
+		<a href="#">全部分类</a>
+		<span>></span>
+		<a href="#">新鲜水果</a>
+		<span>></span>
+		<a href="#">商品详情</a>
+	</div>
+
+	<div class="goods_detail_con clearfix">
+		<div class="goods_detail_pic fl"><img {% if goods.goods_desc %} src="{{ goods.goods_front_image }}" {% endif %} src="/media/{{ goods.goods_front_image }}" style="height:350px;width:350px"></div>
+
+		<div class="goods_detail_list fr">
+			<input type="text" style="display:none" value="{{ goods.goods_nums }}" id="inventory">
+			<h3>{{ goods.name }}</h3>
+			<p>{{ goods.goods_brief }}</p>
+			<div class="prize_bar">
+				<span class="show_pirze">¥<em id="shopprice">{{ goods.shop_price }}</em>元</span>
+				<span class="show_unit">单  位：500g</span>
+			</div>
+			<div class="goods_num clearfix">
+				<div class="num_name fl">数 量：</div>
+				<div class="num_add fl">
+					<input type="text" class="num_show fl" value="1" id="num_show" onchange="num_show({{ goods.id }})">
+					<a href="javascript:;" class="add fr" id="addfr" onclick="add_fr({{ goods.id }})">+</a>
+					<a href="javascript:;" class="minus fr" id="minusfr">-</a>
+				</div>
+			</div>
+			<div class="total">总价：<em id="total_price">{{ goods.shop_price }}</em>元</div>
+			<div class="operate_btn">
+				<a href="javascript:;" class="buy_btn">立即购买</a>
+				<a href="javascript:;" class="add_cart" id="add_cart" onclick="add_to_cart({{ goods.id }})">加入购物车</a>
+			</div>
+		</div>
+	</div>
+	{% csrf_token %}
+	<script>
+		function add_to_cart(id){
+			var nums = $('#num_show').val();
+			var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+			$.ajax({
+				url:'/carts/add_cart/',
+				data:{'goods_id':id,'nums':nums},
+				type:'POST',
+				dataType:'json',
+				headers:{'X-CSRFToken': csrf},
+				success: function(data){
+					if (data.code == 200){
+						$('#show_count').text(data.goods_count)
+					}
+
+				},
+				error: function(data){
+					alert('添加购物车失败')
+				}
+
+			})
+
+		}
+	</script>
+
+	<div class="main_wrap clearfix">
+		<div class="l_wrap fl clearfix">
+			<div class="new_goods">
+				<h3>新品推荐</h3>
+				<ul>
+					<li>
+						<a href="#"><img src="/static/images/goods/goods001.jpg"></a>
+						<h4><a href="#">进口柠檬</a></h4>
+						<div class="prize">￥3.90</div>
+					</li>
+					<li>
+						<a href="#"><img src="/static/images/goods/goods002.jpg"></a>
+						<h4><a href="#">玫瑰香葡萄</a></h4>
+						<div class="prize">￥16.80</div>
+					</li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="r_wrap fr clearfix">
+			<ul class="detail_tab clearfix">
+				<li class="active">商品介绍</li>
+				<li>评论</li>
+			</ul>
+
+			<div class="tab_content">
+				<dl>
+					<dt>商品详情：</dt>
+					<dd>{{ goods.goods_desc | safe }} </dd>
+				</dl>
+			</div>
+
+		</div>
+	</div>
+{% endblock %}
+
+
+{% block js2 %}
+	<div class="add_jump"></div>
+	<script type="text/javascript" src="/static/js/show-good.js"></script>
+	<script type="text/javascript" src="/static/js/jquery-1.12.4.min.js"></script>
+	<script>
+		function goodPriceTotal(){
+			var value = $('#num_show').val();
+			var num = parseInt(value);
+			var shop_price = parseFloat($('#shopprice').text());
+			var total_price = (num * shop_price).toFixed(2);
+			$('#total_price').text(total_price);
+		}
+		function check_inventory(id){
+			var csrf = $('input[name="csrfmiddlewaretoken"]').val();
+			$.ajax({
+				url:'/carts/check_inventory/',
+				type:'POST',
+				dataType:'json',
+				data:{'goods_id':id},
+				headers:{'X-CSRFToken': csrf},
+				success:function(data){
+					inventory = data.goods_nums;
+					$('#inventory').val(inventory)
+
+				},
+				error:function(data){
+					alert('请求库存失败')
+				},
+			});
+
+
+		}
+		function add_fr(id){
+			var value = $('#num_show').val();
+			var num = parseInt(value);
+			check_inventory(id);
+			var inventory = parseInt($('#inventory').val());
+			if (num<200 & num<inventory){
+				num += 1
+			};
+			$('#num_show').val(num);
+			goodPriceTotal();
+		}
+		$('#minusfr').on('click',function(){
+			var value = $('#num_show').val();
+			var num = parseInt(value);
+			if (num>0){
+				num -= 1
+			}
+			$('#num_show').val(num)
+			goodPriceTotal()
+		})
+		function num_show(id){
+			var value = $('#num_show').val();
+			var regex = /[1-9]\d*.?\d*/;
+			if (regex.test(value)) {
+				var num = parseInt(value);
+				check_inventory(id)
+				var inventory = parseInt($('#inventory').val());
+				if (num>inventory){
+					var num = inventory
+				};
+				$('#num_show').val(num)
+				if (0<num&num<200){
+					goodPriceTotal();
+				}else{
+					$('#num_show').val(200);
+					goodPriceTotal();
+				}
+			}else{
+				$('#num_show').val(1)
+				goodPriceTotal();
+			}
+		}
+
+
+	</script>
+	<script type="text/javascript">
+		var $add_x = $('#add_cart').offset().top;
+		var $add_y = $('#add_cart').offset().left;
+
+		var $to_x = $('#show_count').offset().top;
+		var $to_y = $('#show_count').offset().left;
+
+		$(".add_jump").css({'left':$add_y+80,'top':$add_x+10,'display':'block'})
+		$('#add_cart').click(function(){
+			$(".add_jump").stop().animate({
+				'left': $to_y+7,
+				'top': $to_x+7},
+				"fast", function() {
+					$(".add_jump").fadeOut('fast',function(){
+						<!--$('#show_count').html(2);-->
+					});
+
+			});
+		})
+	</script>
+{% endblock %}
+
+	

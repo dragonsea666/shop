@@ -1,0 +1,101 @@
+
+
+{% extends 'base.html' %}
+
+{% block css %}
+	<link rel="stylesheet" type="text/css" href="/static/css/reset.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/main.css">
+{% endblock %}
+
+
+{% block header %}
+	<div class="header_con">
+		<div class="header">
+
+			<div class="welcome fl">欢迎来到海龙山庄-天天生鲜!</div>
+			<div class="fr">
+				{% if user.username %}
+				<div class="login_info fl" style="display:block;">
+					欢迎您：<em >{{ user.username }}</em>
+				</div>
+				{% else %}
+				<div class="login_btn fl">
+					<a href="/user/login/">登录</a>
+					<span>|</span>
+					<a href="/user/register/">注册</a>
+				</div>
+				{% endif %}
+				<div class="user_link fl">
+					<span>|</span>
+					<a href="/user/user_center_info/">用户中心</a>
+					<span>|</span>
+					<a href="/carts/cart/">我的购物车</a>
+					<span>|</span>
+					<a href="/order/user_center_order/">我的订单</a>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block search %}
+	<div class="search_bar clearfix">
+		<a href="index.html" class="logo fl"><img src="/static/images/logo.png"></a>
+		<div class="search_con fl">
+			<form action="" method="post">
+				{% csrf_token %}
+				<input type="text" class="input_text fl" name="keyword" id="search" placeholder="搜索商品">
+				<input type="submit" class="input_btn fr" name="" value="搜索" >
+			</form>
+		</div>
+		<div class="guest_cart fr">
+			<a href="/carts/cart/" class="cart_name fl">我的购物车</a>
+			<div class="goods_count fl" id="show_count">
+				{% if goods_count %}
+					{{ goods_count }}
+				{% else %}
+				1
+				{% endif %}
+			</div>
+		</div>
+	</div>
+	<!--<script>-->
+		<!--function search_goods(){-->
+			<!--var keyword = $('#search').val()-->
+
+			<!--var csrf = $('input[name="csrfmiddlewaretoken"]').val();-->
+			<!--$.ajax({-->
+				<!--url:'/goods/search_list/',-->
+				<!--type:'POST',-->
+				<!--headers:{'X-CSRFToken': csrf},-->
+				<!--data:{'keyword':keyword},-->
+				<!--dataType:'json',-->
+
+				<!--success: function(data){-->
+					<!--console.log(123)-->
+				<!--},-->
+				<!--error:function(data){-->
+					<!--alert('搜索失败')-->
+				<!--}-->
+			<!--})-->
+
+		<!--}-->
+	<!--</script>-->
+{% endblock %}
+
+{% block footer %}
+	<div class="footer">
+		<div class="foot_link">
+			<a href="#">关于我们</a>
+			<span>|</span>
+			<a href="#">联系我们</a>
+			<span>|</span>
+			<a href="#">招聘人才</a>
+			<span>|</span>
+			<a href="#">友情链接</a>
+		</div>
+		<p>CopyRight © 2016 北京天天生鲜信息技术有限公司 All Rights Reserved</p>
+		<p>电话：010-****888    京ICP备*******8号</p>
+	</div>
+{% endblock %}
+
